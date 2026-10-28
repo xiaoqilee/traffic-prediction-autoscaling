@@ -2,6 +2,12 @@
 # Original workload archives and extracted source files
 part1/data/raw/
 
+# Generated forecast outputs for held-out test split — regenerate with:
+# cd part1 && python -B src/forecast.py --split test
+part1/outputs/forecasts/test.csv
+part1/outputs/metrics/forecast_test.csv
+part1/outputs/metrics/test_run.json
+
 __pycache__/
 *.py[codz]
 *$py.class

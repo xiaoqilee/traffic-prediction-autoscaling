@@ -1,0 +1,13 @@
+{
+  "warmup_start_minute": 11520,
+  "scoring_start_minute": 11523,
+  "scoring_end_minute": 15839,
+  "test_warmup_start_minute": 15840,
+  "test_scoring_start_minute": 15843,
+  "test_scoring_end_minute": 20159,
+  "slo_seconds": 5,
+  "headroom_factors": [0.5, 0.75, 1.0, 1.25, 1.5, 2.0],
+  "startup_delays_for_controlled": [1, 3, 5],
+  "workloads": ["steady_01", "steady_02", "bursty_01", "bursty_02"],
+  "forecast_models": ["persistence", "linear", "tree"]
+}

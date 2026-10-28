@@ -1,0 +1,7 @@
+# Generated simulation outputs — regenerate with the pipeline scripts.
+# python -m part3.src.run_validation  ->  validation/
+# python -m part3.src.run_test        ->  test/
+validation/request_outcomes.csv
+validation/minute_logs.csv
+test/request_outcomes.csv
+test/minute_logs.csv
