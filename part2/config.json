@@ -1,0 +1,11 @@
+{
+  "capacity_per_server_per_minute": 60,
+  "service_time_seconds": 1.0,
+  "startup_delay_minutes": 3,
+  "request_timeout_seconds": 60,
+  "slo_seconds": 5,
+  "initial_active_servers": 1,
+  "minimum_servers": 1,
+  "arrival_mode": "uniform",
+  "random_seed": 42
+}

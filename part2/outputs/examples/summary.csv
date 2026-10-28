@@ -1,0 +1,9 @@
+run_id,workload_id,model,arrivals,completed,dropped,server_minutes,mean_response_time_seconds
+steady_01_persistence,steady_01,persistence,979,975,4,124.0,2.2309924505117276
+steady_01_linear,steady_01,linear,979,975,4,124.0,2.2309924505117276
+steady_01_tree,steady_01,tree,979,975,4,124.0,2.2309924505117276
+steady_01_reactive,steady_01,reactive,979,975,4,124.0,2.2309924505117276
+bursty_02_persistence,bursty_02,persistence,2579,2075,504,127.0,2.7120545822179998
+bursty_02_linear,bursty_02,linear,2579,2075,504,124.0,2.7120545822179998
+bursty_02_tree,bursty_02,tree,2579,2075,504,124.0,2.7120545822179998
+bursty_02_reactive,bursty_02,reactive,2579,2075,504,127.0,2.7120545822179998
