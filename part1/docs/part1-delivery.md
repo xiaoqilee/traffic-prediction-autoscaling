@@ -6,6 +6,10 @@ Part 1 provides **observed traffic for four applications and forecasts from thre
 
 ### 1. Start with the Small Example
 
+The example contains short validation excerpts for **two applications**, `steady_01` and `bursty_02`. Each excerpt covers **124 minutes: 3 warmup minutes and 121 scored target minutes**, with observed traffic and forecasts from all three methods.
+
+Use these excerpts to check data loading, time alignment, instance startup, and simulator outputs. The complete traffic dataset covers four applications over 14 days; switch to the full validation data in step 3 for the main comparison.
+
 | File | Use |
 | --- | --- |
 | [outputs/examples/traffic.csv](../outputs/examples/traffic.csv) | Observed request count for each minute |
@@ -34,6 +38,8 @@ The basic rule is `target_instances = ceil(predicted_count / per_instance_capaci
 Schedule scaling at `prediction_time`; compare forecasts with observations at `target_minute`. Account for instances already starting. Future observed counts belong to the replay environment and must not be exposed to the scaling policy early.
 
 ### 3. Switch to Full Validation Data
+
+Run all **four applications over the three validation days (days 9–11)**.
 
 - Traffic: [data/processed/traffic.csv](../data/processed/traffic.csv), filtered to `split=validation`.
 - Forecasts: [outputs/forecasts/validation.csv](../outputs/forecasts/validation.csv), filtered by application and method.
