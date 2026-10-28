@@ -1,0 +1,5 @@
+# Raw per-request simulation outputs are too large for git (100MB+).
+# Regenerate with: python -m part3.src.run_validation  (validation)
+#                  python -m part3.src.run_test          (test)
+validation/request_outcomes.csv
+test/request_outcomes.csv

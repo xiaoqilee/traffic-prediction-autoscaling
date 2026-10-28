@@ -1,0 +1,7 @@
+{
+  "split": "test",
+  "selection_manifest_sha256": "0f33308f25bc8e8ec375cbd35b9c8bf1fcfec701f65ecb50ad57774d46928bd8",
+  "sample_sha256": "77e9a7701dd131c1c82a75e51ef0202b765250ce5291ccd3caccfa89f9599c98",
+  "refit": false,
+  "settings_selected_on_test": false
+}
