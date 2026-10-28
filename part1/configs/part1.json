@@ -1,0 +1,16 @@
+{
+  "sample_dir": "data/processed/features/horizon_3",
+  "workload_manifest": "data/processed/workload_manifest.csv",
+  "random_seed": 42,
+  "ridge": {
+    "alpha": [0.1, 1.0, 10.0]
+  },
+  "tree": {
+    "loss": "squared_error",
+    "max_iter": 100,
+    "learning_rate": 0.1,
+    "max_leaf_nodes": [15, 31],
+    "min_samples_leaf": 20,
+    "early_stopping": false
+  }
+}

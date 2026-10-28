@@ -1,0 +1,39 @@
+{
+  "output_root": "outputs",
+  "horizon_minutes": 3,
+  "forecast_rows": 51804,
+  "diagnostic_rows": 12,
+  "underprediction_runs": 6837,
+  "high_flow_definition": "actual_count > training q95 from complete days 1-8 in workload_manifest.csv",
+  "high_flow_fraction": "sum(max(actual-predicted,0) over high-flow minutes) / sum(actual over same minutes)",
+  "no_high_flow_samples": "NaN in CSV, not zero",
+  "underprediction_run_definition": "predicted < actual; equality, overprediction or minute gaps terminate a run",
+  "validation_actual_source": "Union of validation labels and lag_1 observations, checked for agreement",
+  "case": {
+    "workload_id": "bursty_02",
+    "pattern": "bursty",
+    "start_minute": 14044,
+    "end_minute": 14164,
+    "center_minute": 14104,
+    "rise_count": 120.0,
+    "train_q95": 55.0,
+    "selection_rule": "Largest positive rise above train q95; otherwise largest observed rise",
+    "case_selection_rule": "Bursty workload with largest high-flow shortfall gap between MAE winner and high-flow winner"
+  },
+  "test_used": false,
+  "models_refitted": false,
+  "case_observation": {
+    "actual_count": 143,
+    "predictions": {
+      "linear": 18.953065071804545,
+      "persistence": 19.0,
+      "tree": 21.400124946954563
+    }
+  },
+  "input_sha256": {
+    "workloads": "70dcec31c1933f8d10219c95282af8bd2046297664a8667f0f635382b5edd7a9",
+    "validation": "33bb546dd6b1681e463845eae90acdb9fe05ce10be81cdf44534b1d7020ce1ed",
+    "feature_contract": "1293f2af357aabc3e3dd018a18e511649a5bad8cf86232d92c6ceeda81fb1d77",
+    "forecasts": "07c6fd07d6df7a7cd37c249ed3149736108b6a5b920f2b94348fc7197f1de0f5"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "selection_days": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "required_training_days_present": 8,
+  "minimum_active_fraction": 0.5,
+  "minimum_median_exclusive": 0,
+  "burst_score": "mean percentile rank of CV, p99/p50, positive_jump_p99/max(mean,1)",
+  "steady_score_max": 0.26425680647534955,
+  "bursty_score_min": 0.7375827814569537,
+  "steady_target_score": 0.12150478292862399,
+  "bursty_target_score": 0.8681015452538632,
+  "rise_definition": "delta >= max(1, 0.5*p50, positive_jump_p99) and count >= p95",
+  "rise_separation_minutes": 5,
+  "bursty_minimum_rise_events": 5,
+  "tie_break": "HashOwner, HashApp ascending",
+  "eligible_apps": 906,
+  "selected_apps": 4,
+  "held_out_values_used_for_selection": false
+}

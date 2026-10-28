@@ -1,0 +1,13 @@
+workload_id,split,sample_count,first_prediction_time,last_prediction_time,first_target_minute,last_target_minute
+bursty_01,train,10077,1440,11516,1443,11519
+bursty_01,validation,4317,11520,15836,11523,15839
+bursty_01,test,4317,15840,20156,15843,20159
+bursty_02,train,10077,1440,11516,1443,11519
+bursty_02,validation,4317,11520,15836,11523,15839
+bursty_02,test,4317,15840,20156,15843,20159
+steady_01,train,10077,1440,11516,1443,11519
+steady_01,validation,4317,11520,15836,11523,15839
+steady_01,test,4317,15840,20156,15843,20159
+steady_02,train,10077,1440,11516,1443,11519
+steady_02,validation,4317,11520,15836,11523,15839
+steady_02,test,4317,15840,20156,15843,20159

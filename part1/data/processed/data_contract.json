@@ -1,0 +1,66 @@
+{
+  "dataset": {
+    "dataset": "Azure Functions Trace 2019",
+    "source_url": "https://github.com/Azure/AzurePublicDataset/releases/download/dataset-functions-2019/azurefunctions_dataset2019_azurefunctions-dataset2019.tar.xz",
+    "archive": "azurefunctions2019.tar.xz",
+    "archive_bytes": 142968140,
+    "sha256": "aff8b3ca7240a41a109e4ee598e0a96e45fcb92e7b8395ac19cb3748cd260d89",
+    "selection_days": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "license": "CC-BY"
+  },
+  "description_url": "https://github.com/Azure/AzurePublicDataset/blob/master/AzureFunctionsDataset2019.md",
+  "traffic_columns": {
+    "workload_id": "Stable alias mapped to application hashes in workload_manifest.csv",
+    "minute": "Zero-based relative minute; interval [60*m, 60*(m+1)) seconds",
+    "request_count": "Sum of observed HTTP invocation counts; arrival-intensity proxy",
+    "split": "train, validation, or test, assigned by the observed minute"
+  },
+  "source_field_mapping": {
+    "application_key": [
+      "HashOwner",
+      "HashApp"
+    ],
+    "function_key": [
+      "HashOwner",
+      "HashApp",
+      "HashFunction"
+    ],
+    "filter": "Trigger == http",
+    "minute": "(day - 1) * 1440 + (minute_column - 1)",
+    "request_count": "sum source minute columns over HTTP functions in each application"
+  },
+  "split_minutes": {
+    "train": [
+      0,
+      11520
+    ],
+    "validation": [
+      11520,
+      15840
+    ],
+    "test": [
+      15840,
+      20160
+    ]
+  },
+  "split_end_is_exclusive": true,
+  "timezone": null,
+  "missing_counts": "Empty CSV fields mean unobserved, not zero; no imputation",
+  "duplicate_policy": "Exclude an application's day if an HTTP function key repeats",
+  "arrival_semantics": "Source counts are recorded after execution; exact arrivals are unavailable",
+  "selection_uses_training_only": true,
+  "forecast_convention_for_later_work": {
+    "prediction_time": "Minute boundary t; latest complete count is y[t-1]",
+    "initial_startup_delay_minutes": 3,
+    "target_minute": "t + startup_delay_minutes"
+  }
+}

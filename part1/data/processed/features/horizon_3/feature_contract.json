@@ -1,0 +1,70 @@
+{
+  "traffic_file": "data/processed/traffic.csv",
+  "traffic_sha256": "f7122fffab052f55c8624f51878da4fdc73c55a73bb9e658ab4dff5160f11ed3",
+  "horizon_minutes": 3,
+  "prediction_time": "Boundary t; latest complete observed count is y[t-1]",
+  "target_minute": "t + horizon_minutes",
+  "label": "Observed count in target_minute; kept in original count units",
+  "metadata_columns": [
+    "workload_id",
+    "prediction_time",
+    "target_minute",
+    "split"
+  ],
+  "feature_columns": [
+    "lag_1",
+    "lag_2",
+    "lag_3",
+    "lag_5",
+    "lag_15",
+    "lag_30",
+    "lag_60",
+    "lag_1440",
+    "rolling_mean_5",
+    "rolling_mean_15",
+    "rolling_mean_60",
+    "rolling_std_15",
+    "rolling_std_60",
+    "diff_1",
+    "target_day_sin",
+    "target_day_cos"
+  ],
+  "feature_count": 16,
+  "feature_definitions": {
+    "lag_k": "y[t-k]",
+    "rolling_mean_w": "mean(y[t-w], ..., y[t-1]); require all w observations",
+    "rolling_std_w": "population std(y[t-w], ..., y[t-1]); ddof=0",
+    "diff_1": "y[t-1] - y[t-2]",
+    "target_day_sin": "sin(2*pi*((t+horizon_minutes) % 1440)/1440)",
+    "target_day_cos": "cos(2*pi*((t+horizon_minutes) % 1440)/1440)"
+  },
+  "history_minutes_required": 1440,
+  "split_minutes": {
+    "train": [
+      0,
+      11520
+    ],
+    "validation": [
+      11520,
+      15840
+    ],
+    "test": [
+      15840,
+      20160
+    ]
+  },
+  "split_end_is_exclusive": true,
+  "split_rule": "Both prediction_time and target_minute must fall in the assigned split",
+  "history_across_splits": "Use earlier observed counts, including earlier validation/test minutes",
+  "missing_values": "No imputation; omit samples with missing required features or labels",
+  "csv_features": "Unscaled; trees and persistence use these directly",
+  "standardization": {
+    "per_workload": true,
+    "fit_split": "train",
+    "parameters": "scalers.json",
+    "loader": "load_workload_samples(sample_dir, workload_id, standardize=True)",
+    "label_scaled": false
+  },
+  "total_samples": 74844,
+  "forecast_models_trained": false
+}

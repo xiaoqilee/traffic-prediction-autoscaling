@@ -1,0 +1,240 @@
+{
+  "sample_dir": "data/processed/features/horizon_3",
+  "horizon_minutes": 3,
+  "feature_columns": [
+    "lag_1",
+    "lag_2",
+    "lag_3",
+    "lag_5",
+    "lag_15",
+    "lag_30",
+    "lag_60",
+    "lag_1440",
+    "rolling_mean_5",
+    "rolling_mean_15",
+    "rolling_mean_60",
+    "rolling_std_15",
+    "rolling_std_60",
+    "diff_1",
+    "target_day_sin",
+    "target_day_cos"
+  ],
+  "configuration": {
+    "sample_dir": "data/processed/features/horizon_3",
+    "workload_manifest": "data/processed/workload_manifest.csv",
+    "random_seed": 42,
+    "ridge": {
+      "alpha": [
+        0.1,
+        1.0,
+        10.0
+      ]
+    },
+    "tree": {
+      "loss": "squared_error",
+      "max_iter": 100,
+      "learning_rate": 0.1,
+      "max_leaf_nodes": [
+        15,
+        31
+      ],
+      "min_samples_leaf": 20,
+      "early_stopping": false
+    }
+  },
+  "selection_rule": "Minimum validation MAE after clipping; exact ties use grid order",
+  "preprocessing": "Ridge Pipeline fits StandardScaler on train; tree uses raw features",
+  "output_postprocessing": "Clip predictions to zero; retain floating point counts; no headroom",
+  "refit_with_validation": false,
+  "test_used": false,
+  "thread_limit": 1,
+  "versions": {
+    "python": "3.13.15",
+    "sklearn": "1.9.1",
+    "numpy": "2.5.4",
+    "pandas": "3.1.0"
+  },
+  "input_sha256": {
+    "train.csv": "22ce51fa4d8cc400007df6d25b1c38b3e1b2594026e2f09b02f7fcbfcb682ad6",
+    "validation.csv": "33bb546dd6b1681e463845eae90acdb9fe05ce10be81cdf44534b1d7020ce1ed",
+    "feature_contract.json": "1293f2af357aabc3e3dd018a18e511649a5bad8cf86232d92c6ceeda81fb1d77"
+  },
+  "workloads": {
+    "bursty_01": {
+      "pattern": "bursty",
+      "training_samples": 10077,
+      "validation_samples": 4317,
+      "models": {
+        "persistence": {
+          "parameters": {},
+          "validation_scores": {
+            "n_samples": 4317,
+            "mae": 29.51424600416956,
+            "rmse": 42.0314391965804
+          },
+          "model_file": null
+        },
+        "linear": {
+          "parameters": {
+            "alpha": 10.0
+          },
+          "validation_scores": {
+            "n_samples": 4317,
+            "mae": 20.40622939369545,
+            "rmse": 27.414389646478732
+          },
+          "model_file": "bursty_01/linear.joblib"
+        },
+        "tree": {
+          "parameters": {
+            "loss": "squared_error",
+            "max_iter": 100,
+            "learning_rate": 0.1,
+            "min_samples_leaf": 20,
+            "early_stopping": false,
+            "max_leaf_nodes": 31,
+            "random_state": 42
+          },
+          "validation_scores": {
+            "n_samples": 4317,
+            "mae": 19.571048242819796,
+            "rmse": 26.697593571812174
+          },
+          "model_file": "bursty_01/tree.joblib"
+        }
+      }
+    },
+    "bursty_02": {
+      "pattern": "bursty",
+      "training_samples": 10077,
+      "validation_samples": 4317,
+      "models": {
+        "persistence": {
+          "parameters": {},
+          "validation_scores": {
+            "n_samples": 4317,
+            "mae": 10.611304146397961,
+            "rmse": 17.117296899299074
+          },
+          "model_file": null
+        },
+        "linear": {
+          "parameters": {
+            "alpha": 0.1
+          },
+          "validation_scores": {
+            "n_samples": 4317,
+            "mae": 8.082262499869898,
+            "rmse": 12.589034063910237
+          },
+          "model_file": "bursty_02/linear.joblib"
+        },
+        "tree": {
+          "parameters": {
+            "loss": "squared_error",
+            "max_iter": 100,
+            "learning_rate": 0.1,
+            "min_samples_leaf": 20,
+            "early_stopping": false,
+            "max_leaf_nodes": 15,
+            "random_state": 42
+          },
+          "validation_scores": {
+            "n_samples": 4317,
+            "mae": 8.260678574222457,
+            "rmse": 12.699384888513265
+          },
+          "model_file": "bursty_02/tree.joblib"
+        }
+      }
+    },
+    "steady_01": {
+      "pattern": "steady",
+      "training_samples": 10077,
+      "validation_samples": 4317,
+      "models": {
+        "persistence": {
+          "parameters": {},
+          "validation_scores": {
+            "n_samples": 4317,
+            "mae": 0.10516562427611767,
+            "rmse": 0.3856350411847659
+          },
+          "model_file": null
+        },
+        "linear": {
+          "parameters": {
+            "alpha": 0.1
+          },
+          "validation_scores": {
+            "n_samples": 4317,
+            "mae": 0.08895567364376644,
+            "rmse": 0.2741621977905178
+          },
+          "model_file": "steady_01/linear.joblib"
+        },
+        "tree": {
+          "parameters": {
+            "loss": "squared_error",
+            "max_iter": 100,
+            "learning_rate": 0.1,
+            "min_samples_leaf": 20,
+            "early_stopping": false,
+            "max_leaf_nodes": 15,
+            "random_state": 42
+          },
+          "validation_scores": {
+            "n_samples": 4317,
+            "mae": 0.09441346114328757,
+            "rmse": 0.2857792656649018
+          },
+          "model_file": "steady_01/tree.joblib"
+        }
+      }
+    },
+    "steady_02": {
+      "pattern": "steady",
+      "training_samples": 10077,
+      "validation_samples": 4317,
+      "models": {
+        "persistence": {
+          "parameters": {},
+          "validation_scores": {
+            "n_samples": 4317,
+            "mae": 0.13226777854991892,
+            "rmse": 0.36432274597993464
+          },
+          "model_file": null
+        },
+        "linear": {
+          "parameters": {
+            "alpha": 0.1
+          },
+          "validation_scores": {
+            "n_samples": 4317,
+            "mae": 0.12181284659853284,
+            "rmse": 0.24623720519202083
+          },
+          "model_file": "steady_02/linear.joblib"
+        },
+        "tree": {
+          "parameters": {
+            "loss": "squared_error",
+            "max_iter": 100,
+            "learning_rate": 0.1,
+            "min_samples_leaf": 20,
+            "early_stopping": false,
+            "max_leaf_nodes": 15,
+            "random_state": 42
+          },
+          "validation_scores": {
+            "n_samples": 4317,
+            "mae": 0.11862073577413154,
+            "rmse": 0.24746185576158863
+          },
+          "model_file": "steady_02/tree.joblib"
+        }
+      }
+    }
+  }
+}

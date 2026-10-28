@@ -1,4 +1,7 @@
 # Byte-compiled / optimized / DLL files
+# Original workload archives and extracted source files
+part1/data/raw/
+
 __pycache__/
 *.py[codz]
 *$py.class

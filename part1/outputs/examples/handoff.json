@@ -1,0 +1,26 @@
+{
+  "horizon_minutes": 3,
+  "traffic_rows": 248,
+  "all_model_forecast_rows": 726,
+  "workloads": [
+    {
+      "workload_id": "steady_01",
+      "traffic_start_minute": 13641,
+      "traffic_end_minute": 13764,
+      "scoring_target_start": 13644,
+      "scoring_target_end": 13764,
+      "warmup_minutes": 3
+    },
+    {
+      "workload_id": "bursty_02",
+      "traffic_start_minute": 14041,
+      "traffic_end_minute": 14164,
+      "scoring_target_start": 14044,
+      "scoring_target_end": 14164,
+      "warmup_minutes": 3
+    }
+  ],
+  "time_index": "Original dataset-relative minutes; subtract the same origin from all time columns if rebasing",
+  "initialization": "Replay warmup traffic under common initial capacity; score from scoring_target_start",
+  "simulator_integration_executed": false
+}

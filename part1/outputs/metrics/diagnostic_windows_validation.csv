@@ -1,0 +1,5 @@
+workload_id,pattern,start_minute,end_minute,center_minute,rise_count,train_q95,selection_rule
+steady_01,steady,13644,13764,13704,3.0,8.0,Largest positive rise above train q95; otherwise largest observed rise
+steady_02,steady,12298,12418,12358,2.0,4.0,Largest positive rise above train q95; otherwise largest observed rise
+bursty_01,bursty,15049,15169,15109,164.0,95.0,Largest positive rise above train q95; otherwise largest observed rise
+bursty_02,bursty,14044,14164,14104,120.0,55.0,Largest positive rise above train q95; otherwise largest observed rise
