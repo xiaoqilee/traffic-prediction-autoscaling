@@ -447,6 +447,58 @@ class DispatchCadenceTests(unittest.TestCase):
             5.0,
         )
 
+    def test_headroom_policy_starts_extra_server(self):
+        traffic = pd.DataFrame(
+            [
+                {
+                    "workload_id": "headroom_test",
+                    "minute": 0,
+                    "request_count": 1,
+                    "split": "validation",
+                }
+            ]
+        )
+
+        forecasts = pd.DataFrame(
+            [
+                {
+                    "workload_id": "headroom_test",
+                    "prediction_time": 0,
+                    "target_minute": 3,
+                    "model": "tree",
+                    "predicted_count": 60,
+                }
+            ]
+        )
+
+        config = {
+            "capacity_per_server_per_minute": 60,
+            "service_time_seconds": 1.0,
+            "startup_delay_minutes": 3,
+            "request_timeout_seconds": 60,
+            "slo_seconds": 5,
+            "initial_active_servers": 1,
+            "minimum_servers": 1,
+            "arrival_mode": "uniform",
+            "random_seed": 42,
+        }
+
+        result = simulate_replay(
+            traffic=traffic,
+            forecasts=forecasts,
+            config=config,
+            policy="forecast_headroom",
+            workload_id="headroom_test",
+            model="tree",
+            run_id="headroom-test",
+            headroom_factor=2.0,
+        )
+
+        self.assertGreater(
+            result["minute_logs"]["starting_servers"].max(),
+            0,
+        )
+
 class ReplayTests(unittest.TestCase):
     def test_small_forecast_replay_returns_outputs(self):
         repository_root = Path(__file__).parents[2]

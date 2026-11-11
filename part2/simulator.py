@@ -428,6 +428,7 @@ def simulate_replay(
     workload_id=None,
     model=None,
     run_id=None,
+    headroom_factor=1.0,
 ):
     """Replay one workload through the autoscaling simulator."""
     from part2.scaling import choose_target_servers
@@ -451,7 +452,7 @@ def simulate_replay(
     if traffic.empty:
         raise ValueError(f"No traffic found for {workload_id}")
 
-    if policy == "forecast":
+    if policy in {"forecast", "forecast_headroom"}:
         if model is None:
             models = forecasts["model"].unique()
             if len(models) != 1:
@@ -655,19 +656,20 @@ def simulate_replay(
 
         # Make a scaling decision at each minute boundary.
         if current_second % 60 == 0:
-            if policy == "forecast":
+            if policy in {"forecast", "forecast_headroom"}:
                 predicted_count = forecast_by_minute.get(
                     current_minute
                 )
 
                 if predicted_count is not None:
                     target_servers = choose_target_servers(
-                        "forecast",
+                        policy,
                         config[
                             "capacity_per_server_per_minute"
                         ],
                         config["minimum_servers"],
                         predicted_count=predicted_count,
+                        headroom_factor=headroom_factor,
                     )
                     apply_target_servers(
                         target_servers,
@@ -697,8 +699,6 @@ def simulate_replay(
                     service_pool,
                     current_second,
                 )
-
-            drain_waiting_requests(current_second)
 
         # Process new arrivals during this second.
         for row in arrivals_by_second.get(

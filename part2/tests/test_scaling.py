@@ -56,16 +56,17 @@ class ScalingTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             target_servers_from_forecast(50, 0)
 
-    def test_unified_forecast_policy(self):
+    def test_unified_headroom_policy(self):
         self.assertEqual(
             choose_target_servers(
-                "forecast",
+                "forecast_headroom",
                 capacity_per_server_per_minute=60,
-                predicted_count=121,
+                predicted_count=60,
+                headroom_factor=1.5,
             ),
-            3,
+            2,
         )
-
+        
     def test_unified_reactive_policy(self):
         self.assertEqual(
             choose_target_servers(

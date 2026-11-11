@@ -64,6 +64,7 @@ def choose_target_servers(
     minimum_servers=1,
     predicted_count=None,
     previous_actual_count=None,
+    headroom_factor=1.0,
 ):
     """Choose a target server count for a named scaling policy."""
     if policy == "forecast":
@@ -75,6 +76,19 @@ def choose_target_servers(
         return target_servers_from_forecast(
             predicted_count,
             capacity_per_server_per_minute,
+            minimum_servers,
+        )
+
+    if policy == "forecast_headroom":
+        if predicted_count is None:
+            raise ValueError(
+                "Headroom policy requires predicted_count"
+            )
+
+        return target_servers_with_headroom(
+            predicted_count,
+            capacity_per_server_per_minute,
+            headroom_factor,
             minimum_servers,
         )
 
