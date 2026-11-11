@@ -428,6 +428,8 @@ def simulate_replay(
     workload_id=None,
     model=None,
     run_id=None,
+    headroom_factor=1.0,
+    queue_feedback_weight=1.0,
 ):
     """Replay one workload through the autoscaling simulator."""
     from part2.scaling import choose_target_servers
@@ -451,7 +453,7 @@ def simulate_replay(
     if traffic.empty:
         raise ValueError(f"No traffic found for {workload_id}")
 
-    if policy == "forecast":
+    if policy in {"forecast", "forecast_headroom", "forecast_queue_feedback"}:
         if model is None:
             models = forecasts["model"].unique()
             if len(models) != 1:
@@ -650,21 +652,27 @@ def simulate_replay(
         )
         capture_new_drops(current_minute)
 
+        # Serve queued requests whenever capacity becomes available.
+        drain_waiting_requests(current_second)
+
         # Make a scaling decision at each minute boundary.
         if current_second % 60 == 0:
-            if policy == "forecast":
+            if policy in {"forecast", "forecast_headroom", "forecast_queue_feedback"}:
                 predicted_count = forecast_by_minute.get(
                     current_minute
                 )
 
                 if predicted_count is not None:
                     target_servers = choose_target_servers(
-                        "forecast",
+                        policy,
                         config[
                             "capacity_per_server_per_minute"
                         ],
                         config["minimum_servers"],
                         predicted_count=predicted_count,
+                        headroom_factor=headroom_factor,
+                        queue_length=len(request_queue),
+                        queue_feedback_weight=queue_feedback_weight,
                     )
                     apply_target_servers(
                         target_servers,
@@ -694,8 +702,6 @@ def simulate_replay(
                     service_pool,
                     current_second,
                 )
-
-            drain_waiting_requests(current_second)
 
         # Process new arrivals during this second.
         for row in arrivals_by_second.get(

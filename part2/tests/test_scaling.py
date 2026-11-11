@@ -3,7 +3,9 @@ import unittest
 from part2.scaling import (
     target_servers_from_forecast,
     target_servers_reactive,
-    choose_target_servers
+    choose_target_servers,
+    target_servers_with_headroom,
+    target_servers_with_queue_feedback,
 )
 
 class ScalingTests(unittest.TestCase):
@@ -13,6 +15,62 @@ class ScalingTests(unittest.TestCase):
         self.assertEqual(target_servers_from_forecast(61, 60), 2)
         self.assertEqual(target_servers_from_forecast(120, 60), 2)
         self.assertEqual(target_servers_from_forecast(121, 60), 3)
+
+    def test_headroom_scaling(self):
+        self.assertEqual(
+            target_servers_with_headroom(
+                predicted_count=60,
+                capacity_per_server_per_minute=60,
+                headroom_factor=1.0,
+            ),
+            1,
+        )
+
+        self.assertEqual(
+            target_servers_with_headroom(
+                predicted_count=60,
+                capacity_per_server_per_minute=60,
+                headroom_factor=1.5,
+            ),
+            2,
+        )
+
+        self.assertEqual(
+            target_servers_with_headroom(
+                predicted_count=120,
+                capacity_per_server_per_minute=60,
+                headroom_factor=1.5,
+            ),
+            3,
+        )
+
+    def test_queue_feedback_scaling(self):
+        self.assertEqual(
+            target_servers_with_queue_feedback(
+                predicted_count=60,
+                queue_length=0,
+                capacity_per_server_per_minute=60,
+            ),
+            1,
+        )
+
+        self.assertEqual(
+            target_servers_with_queue_feedback(
+                predicted_count=60,
+                queue_length=60,
+                capacity_per_server_per_minute=60,
+            ),
+            2,
+        )
+
+        self.assertEqual(
+            target_servers_with_queue_feedback(
+                predicted_count=60,
+                queue_length=120,
+                capacity_per_server_per_minute=60,
+            ),
+            3,
+        )
 
     def test_reactive_scaling(self):
         self.assertEqual(target_servers_reactive(30, 60), 1)
@@ -27,14 +85,26 @@ class ScalingTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             target_servers_from_forecast(50, 0)
 
-    def test_unified_forecast_policy(self):
+    def test_unified_headroom_policy(self):
         self.assertEqual(
             choose_target_servers(
-                "forecast",
+                "forecast_headroom",
                 capacity_per_server_per_minute=60,
-                predicted_count=121,
+                predicted_count=60,
+                headroom_factor=1.5,
             ),
-            3,
+            2,
+        )
+
+    def test_unified_queue_feedback_policy(self):
+        self.assertEqual(
+            choose_target_servers(
+                "forecast_queue_feedback",
+                capacity_per_server_per_minute=60,
+                predicted_count=60,
+                queue_length=60,
+            ),
+            2,
         )
 
     def test_unified_reactive_policy(self):

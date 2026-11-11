@@ -1,0 +1,13 @@
+run_id,workload_id,model,arrivals,completed,dropped,server_minutes,mean_response_time_seconds,policy
+steady_01_forecast,steady_01,tree,34445,34445,0,4320.0,0.5629485999065371,forecast
+steady_01_forecast_headroom,steady_01,tree,34445,34445,0,4320.0,0.5629485999065371,forecast_headroom
+steady_01_forecast_queue_feedback,steady_01,tree,34445,34445,0,4320.0,0.5629485999065371,forecast_queue_feedback
+steady_02_forecast,steady_02,tree,17006,17006,0,4320.0,0.5262508136586992,forecast
+steady_02_forecast_headroom,steady_02,tree,17006,17006,0,4320.0,0.5262508136586992,forecast_headroom
+steady_02_forecast_queue_feedback,steady_02,tree,17006,17006,0,4320.0,0.5262508136586992,forecast_queue_feedback
+bursty_01_forecast,bursty_01,tree,101241,96434,4807,4556.0,10.599167258421188,forecast
+bursty_01_forecast_headroom,bursty_01,tree,101241,97283,3958,5155.0,9.450349667132457,forecast_headroom
+bursty_01_forecast_queue_feedback,bursty_01,tree,101241,96833,4408,4761.0,10.143835124971604,forecast_queue_feedback
+bursty_02_forecast,bursty_02,tree,59682,59501,181,4320.0,2.2892634178207967,forecast
+bursty_02_forecast_headroom,bursty_02,tree,59682,59503,179,4413.0,2.255540064822367,forecast_headroom
+bursty_02_forecast_queue_feedback,bursty_02,tree,59682,59501,181,4341.0,2.2892634178207967,forecast_queue_feedback
