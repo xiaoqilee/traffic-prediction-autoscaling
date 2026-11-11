@@ -499,6 +499,75 @@ class DispatchCadenceTests(unittest.TestCase):
             0,
         )
 
+    def test_queue_feedback_policy_uses_backlog(self):
+        traffic = pd.DataFrame(
+            [
+                {
+                    "workload_id": "queue_feedback_test",
+                    "minute": 0,
+                    "request_count": 240,
+                    "split": "validation",
+                },
+                {
+                    "workload_id": "queue_feedback_test",
+                    "minute": 1,
+                    "request_count": 0,
+                    "split": "validation",
+                },
+            ]
+        )
+
+        forecasts = pd.DataFrame(
+            [
+                {
+                    "workload_id": "queue_feedback_test",
+                    "prediction_time": 0,
+                    "target_minute": 3,
+                    "model": "tree",
+                    "predicted_count": 1,
+                },
+                {
+                    "workload_id": "queue_feedback_test",
+                    "prediction_time": 1,
+                    "target_minute": 4,
+                    "model": "tree",
+                    "predicted_count": 1,
+                },
+            ]
+        )
+
+        config = {
+            "capacity_per_server_per_minute": 60,
+            "service_time_seconds": 1.0,
+            "startup_delay_minutes": 3,
+            "request_timeout_seconds": 1000,
+            "slo_seconds": 5,
+            "initial_active_servers": 1,
+            "minimum_servers": 1,
+            "arrival_mode": "uniform",
+            "random_seed": 42,
+        }
+
+        result = simulate_replay(
+            traffic=traffic,
+            forecasts=forecasts,
+            config=config,
+            policy="forecast_queue_feedback",
+            workload_id="queue_feedback_test",
+            model="tree",
+            run_id="queue-feedback-test",
+        )
+        
+        self.assertGreater(
+            result["minute_logs"]["active_servers"].max(),
+            1,
+        )
+
+        self.assertGreater(
+            result["minute_logs"]["queue_length"].max(),
+            0,
+        )
+
 class ReplayTests(unittest.TestCase):
     def test_small_forecast_replay_returns_outputs(self):
         repository_root = Path(__file__).parents[2]

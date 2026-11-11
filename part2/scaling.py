@@ -43,6 +43,36 @@ def target_servers_with_headroom(
         minimum_servers,
     )
 
+def target_servers_with_queue_feedback(
+    predicted_count,
+    queue_length,
+    capacity_per_server_per_minute,
+    queue_feedback_weight=1.0,
+    minimum_servers=1,
+):
+    """Choose servers using forecast demand plus queued requests."""
+    if queue_feedback_weight < 0:
+        raise ValueError(
+            "Queue feedback weight cannot be negative"
+        )
+
+    _validate_settings(
+        capacity_per_server_per_minute,
+        minimum_servers,
+    )
+
+    adjusted_count = (
+        max(0.0, float(predicted_count))
+        + queue_feedback_weight
+        * max(0.0, float(queue_length))
+    )
+
+    return target_servers_from_forecast(
+        adjusted_count,
+        capacity_per_server_per_minute,
+        minimum_servers,
+    )
+
 def target_servers_reactive(
     previous_actual_count,
     capacity_per_server_per_minute,
@@ -65,6 +95,8 @@ def choose_target_servers(
     predicted_count=None,
     previous_actual_count=None,
     headroom_factor=1.0,
+    queue_length=None,
+    queue_feedback_weight=1.0,
 ):
     """Choose a target server count for a named scaling policy."""
     if policy == "forecast":
@@ -92,6 +124,25 @@ def choose_target_servers(
             minimum_servers,
         )
 
+    if policy == "forecast_queue_feedback":
+        if predicted_count is None:
+            raise ValueError(
+                "Queue feedback policy requires predicted_count"
+            )
+
+        if queue_length is None:
+            raise ValueError(
+                "Queue feedback policy requires queue_length"
+            )
+
+        return target_servers_with_queue_feedback(
+            predicted_count,
+            queue_length,
+            capacity_per_server_per_minute,
+            queue_feedback_weight,
+            minimum_servers,
+        )
+    
     if policy == "reactive":
         if previous_actual_count is None:
             raise ValueError(
