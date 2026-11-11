@@ -228,5 +228,9 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
+# Large generated request-level simulation outputs
+part2/outputs/ablation/request_outcomes.csv
+part2/outputs/validation/request_outcomes.csv
+
 # others
 reports/
