@@ -1,0 +1,13 @@
+workload_id,model,max_absolute_difference
+bursty_01,persistence,0.0
+bursty_01,linear,0.0
+bursty_01,tree,0.0
+bursty_02,persistence,0.0
+bursty_02,linear,0.0
+bursty_02,tree,0.0
+steady_01,persistence,0.0
+steady_01,linear,0.0
+steady_01,tree,0.0
+steady_02,persistence,0.0
+steady_02,linear,0.0
+steady_02,tree,0.0

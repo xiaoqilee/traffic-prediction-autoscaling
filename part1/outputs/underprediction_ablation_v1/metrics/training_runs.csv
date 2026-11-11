@@ -1,0 +1,9 @@
+workload_id,model,fit_seconds,training_samples,changed_parameters
+bursty_01,tree_q50,0.20215927899971575,10077,"loss,quantile"
+bursty_01,tree_underprediction,0.21505172700017283,10077,"loss,quantile"
+bursty_02,tree_q50,0.12803230400004395,10077,"loss,quantile"
+bursty_02,tree_underprediction,0.1263183900000513,10077,"loss,quantile"
+steady_01,tree_q50,0.12290784800006804,10077,"loss,quantile"
+steady_01,tree_underprediction,0.12302912199993443,10077,"loss,quantile"
+steady_02,tree_q50,0.138951600999917,10077,"loss,quantile"
+steady_02,tree_underprediction,0.13851115699981165,10077,"loss,quantile"

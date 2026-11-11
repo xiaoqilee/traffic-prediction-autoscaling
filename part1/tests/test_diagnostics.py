@@ -55,6 +55,40 @@ class DiagnosticTests(unittest.TestCase):
         self.assertEqual(row.max_run_length, 0)
         self.assertTrue(runs.empty)
 
+    def test_overprediction_spike_misses_and_material_shortfalls_have_distinct_denominators(self):
+        rows = joined_rows([10, 20, 40, 40, 0], [9.9, 25, 20, 45, 2])
+        training = pd.DataFrame([{"workload_id": "app", "pattern": "bursty", "train_p95": 20}])
+        metrics, _ = compute_diagnostics(rows, training)
+        row = metrics.iloc[0]
+        self.assertEqual(row.high_flow_minutes, 2)
+        self.assertEqual(row.high_flow_missed_minutes, 1)
+        self.assertEqual(row.high_flow_miss_rate, 0.5)
+        self.assertEqual(row.high_flow_mae, 12.5)
+        self.assertAlmostEqual(row.high_flow_rmse, np.sqrt((400 + 25) / 2))
+        self.assertEqual(row.overprediction_count_sum, 12)
+        self.assertEqual(row.high_flow_overprediction_count_sum, 5)
+        self.assertEqual(row.non_high_flow_overprediction_count_sum, 7)
+        self.assertAlmostEqual(row.overprediction_volume_fraction, 12 / 110)
+        self.assertEqual(row.overprediction_fraction, 3 / 5)
+        self.assertEqual(row.underprediction_minutes, 2)
+        self.assertEqual(row.material_underprediction_minutes, 1)
+
+    def test_material_runs_ignore_small_errors_and_include_exactly_one(self):
+        rows = joined_rows([5] * 6, [4.9, 4, 3, 4.9, 4, 3], minutes=[1, 2, 3, 4, 5, 7])
+        runs = underprediction_runs(rows, threshold=4, min_shortfall=1)
+        self.assertEqual(list(zip(runs.start_minute, runs.end_minute)), [(2, 3), (5, 5), (7, 7)])
+        self.assertEqual(runs.shortfall_count.tolist(), [3, 1, 2])
+
+    def test_zero_volume_and_absent_high_flow_are_missing_not_perfect_scores(self):
+        metrics, _ = compute_diagnostics(
+            joined_rows([0, 0], [0, 2]),
+            pd.DataFrame([{"workload_id": "app", "pattern": "steady", "train_p95": 0}]),
+        )
+        row = metrics.iloc[0]
+        self.assertTrue(pd.isna(row.high_flow_miss_rate))
+        self.assertTrue(pd.isna(row.high_flow_rmse))
+        self.assertTrue(pd.isna(row.overprediction_volume_fraction))
+
     def test_underprediction_runs_break_on_gaps_equality_and_overprediction(self):
         rows = joined_rows([5] * 9, [3, 3, 3, 5, 4, 7, 1, 2, 5],
                            minutes=[1, 2, 4, 5, 6, 7, 8, 9, 10])

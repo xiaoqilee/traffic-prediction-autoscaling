@@ -1,0 +1,4 @@
+workload_id,start_minute,end_minute,center_minute,case,train_q95,peak_actual,ordinary_peak_prediction,selection_rule,peak_matched,ordinary_peak_hit,event_start_minute,event_end_minute,peak_relative_distance,event_shortfall_fraction
+bursty_02,14044,14164,14104,failure,55.0,143.0,21.400124946954563,Fixed largest high-flow rise from the original diagnostics,True,False,,,,
+bursty_02,13726,13846,13786,best_available,55.0,57.0,52.72955767374148,"No ordinary peak hit; best available event shortfall, not a successful peak forecast",False,False,13786.0,13786.0,0.6013986013986015,0.07492004081155294
+bursty_01,14980,15100,15040,success_other_workload,95.0,144.0,141.27502511112283,Supplementary other-bursty-workload peak hit; prefer matched peak and minimum event shortfall; not a within-workload control,True,True,15040.0,15040.0,0.006993006993007089,0.018923436728313685

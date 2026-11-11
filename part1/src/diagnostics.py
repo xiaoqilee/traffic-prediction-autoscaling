@@ -18,7 +18,8 @@ else:
 
 
 MODELS = ("persistence", "linear", "tree")
-COLORS = {"persistence": "#4477AA", "linear": "#EE7733", "tree": "#228833"}
+COLORS = {"persistence": "#4477AA", "linear": "#EE7733", "tree": "#228833",
+          "tree_q50": "#AA3377", "tree_underprediction": "#CC3311"}
 RUN_COLUMNS = [
     "workload_id", "model", "start_minute", "end_minute", "length_minutes",
     "shortfall_count", "mean_shortfall", "max_shortfall", "high_flow_minutes",
@@ -49,6 +50,8 @@ def recover_validation_traffic(validation, minute_range):
 
 def join_validation_forecasts(validation, forecasts):
     keys = ["workload_id", "prediction_time", "target_minute"]
+    if not np.isfinite(forecasts.predicted_count).all() or forecasts.predicted_count.lt(0).any():
+        raise ValueError("Forecast counts must be finite and nonnegative")
     if forecasts.duplicated(["workload_id", "model", "target_minute"]).any():
         raise ValueError("Duplicate application/model/target forecast keys")
     joined = forecasts.merge(validation[keys + ["label"]], on=keys, how="left", validate="many_to_one")
@@ -64,9 +67,13 @@ def join_validation_forecasts(validation, forecasts):
     )
 
 
-def underprediction_runs(rows, threshold):
+def underprediction_runs(rows, threshold, min_shortfall=0):
+    """Find strict shortfalls, or shortfalls at least a positive minimum magnitude."""
+    if min_shortfall < 0:
+        raise ValueError("Minimum shortfall must be nonnegative")
     rows = rows.sort_values("target_minute").copy()
-    under = rows.predicted_count.lt(rows.actual_count)
+    shortfall = rows.actual_count - rows.predicted_count
+    under = shortfall.gt(0) if min_shortfall == 0 else shortfall.ge(min_shortfall)
     starts = under & (~under.shift(fill_value=False) | rows.target_minute.diff().ne(1))
     selected = rows.loc[under].copy()
     if selected.empty:
@@ -93,9 +100,12 @@ def compute_diagnostics(joined, workloads):
         threshold = float(reference.train_p95)
         high = rows.actual_count.gt(threshold)
         shortfall = (rows.actual_count - rows.predicted_count).clip(lower=0)
+        excess = (rows.predicted_count - rows.actual_count).clip(lower=0)
+        total_actual = float(rows.actual_count.sum())
         high_actual = float(rows.loc[high, "actual_count"].sum())
         high_shortfall = float(shortfall.loc[high].sum())
         runs = underprediction_runs(rows, threshold)
+        material_runs = underprediction_runs(rows, threshold, min_shortfall=1)
         all_runs.append(runs)
         metrics.append({
             "workload_id": workload_id, "pattern": reference.pattern, "model": model,
@@ -111,6 +121,22 @@ def compute_diagnostics(joined, workloads):
             "underprediction_runs": len(runs),
             "mean_run_length": float(runs.length_minutes.mean()) if len(runs) else 0.0,
             "max_run_length": int(runs.length_minutes.max()) if len(runs) else 0,
+            "actual_count_sum": total_actual,
+            "high_flow_mae": float((shortfall + excess).loc[high].mean()) if high.any() else np.nan,
+            "high_flow_rmse": float(np.sqrt(((rows.actual_count - rows.predicted_count).loc[high] ** 2).mean())) if high.any() else np.nan,
+            "high_flow_missed_minutes": int((high & rows.predicted_count.le(threshold)).sum()),
+            "high_flow_miss_rate": float(rows.loc[high, "predicted_count"].le(threshold).mean()) if high.any() else np.nan,
+            "overprediction_minutes": int(excess.gt(0).sum()),
+            "overprediction_fraction": float(excess.gt(0).mean()),
+            "overprediction_count_sum": float(excess.sum()),
+            "mean_overprediction": float(excess.mean()),
+            "overprediction_volume_fraction": float(excess.sum()) / total_actual if total_actual else np.nan,
+            "high_flow_overprediction_count_sum": float(excess.loc[high].sum()),
+            "non_high_flow_overprediction_count_sum": float(excess.loc[~high].sum()),
+            "material_underprediction_minutes": int(shortfall.ge(1).sum()),
+            "material_underprediction_runs": len(material_runs),
+            "material_mean_run_length": float(material_runs.length_minutes.mean()) if len(material_runs) else 0.0,
+            "material_max_run_length": int(material_runs.length_minutes.max()) if len(material_runs) else 0,
         })
     nonempty_runs = [frame for frame in all_runs if len(frame)]
     runs = pd.concat(nonempty_runs, ignore_index=True) if nonempty_runs else pd.DataFrame(columns=RUN_COLUMNS)
@@ -181,14 +207,20 @@ def select_case(metrics, windows):
     return result
 
 
+def present_models(rows):
+    """Keep familiar model order while allowing additional forecast methods."""
+    names = set(rows.model)
+    return [name for name in COLORS if name in names] + sorted(names - set(COLORS))
+
+
 def draw_forecasts(axis, rows, threshold, relative_days=False):
     actual = rows.drop_duplicates("target_minute").sort_values("target_minute")
     x = actual.target_minute / 1440 + 1 if relative_days else actual.target_minute
     axis.plot(x, actual.actual_count, color="#222222", linewidth=1, label="Actual", zorder=5)
-    for model in MODELS:
+    for model in present_models(rows):
         group = rows.loc[rows.model.eq(model)].sort_values("target_minute")
         target = group.target_minute / 1440 + 1 if relative_days else group.target_minute
-        axis.plot(target, group.predicted_count, color=COLORS[model], alpha=0.8,
+        axis.plot(target, group.predicted_count, color=COLORS.get(model), alpha=0.8,
                   linewidth=0.7, label=model)
     axis.axhline(threshold, color="#888888", linestyle="--", linewidth=0.8, label="Train q95")
     axis.set_ylabel("HTTP invocations / minute")
@@ -223,10 +255,10 @@ def plot_case(joined, case, path):
                          transform=axes[0].get_xaxis_transform(), color="#CC6677", alpha=0.12, step="mid")
     axes[0].set_title(f"{case['workload_id']}: forecasts aligned to their target minutes")
     axes[0].legend(loc="upper right", ncol=5)
-    for model in MODELS:
+    for model in present_models(rows):
         group = rows.loc[rows.model.eq(model)].sort_values("target_minute")
         shortfall = (group.actual_count - group.predicted_count).clip(lower=0)
-        axes[1].plot(group.target_minute, shortfall, color=COLORS[model], label=model)
+        axes[1].plot(group.target_minute, shortfall, color=COLORS.get(model), label=model)
     axes[1].set(xlabel="Target minute (dataset-relative)", ylabel="Underpredicted count / minute")
     axes[1].legend(loc="upper right", ncol=3)
     for axis in axes:

@@ -1,0 +1,18 @@
+{
+  "baseline_config": "configs/part1.json",
+  "baseline_output_root": "outputs",
+  "baseline_diagnostics_manifest": "outputs/metrics/diagnostics_manifest.json",
+  "output_root": "outputs/underprediction_ablation_v1",
+  "quantiles": {
+    "tree_q50": 0.5,
+    "tree_underprediction": 0.75
+  },
+  "prediction_rtol": 1e-10,
+  "prediction_atol": 1e-10,
+  "failure_case": {
+    "workload_id": "bursty_02",
+    "start_minute": 14044,
+    "end_minute": 14164,
+    "center_minute": 14104
+  }
+}

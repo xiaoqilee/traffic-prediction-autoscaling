@@ -1,0 +1,98 @@
+{
+  "configuration": {
+    "baseline_config": "configs/part1.json",
+    "baseline_output_root": "outputs",
+    "baseline_diagnostics_manifest": "outputs/metrics/diagnostics_manifest.json",
+    "output_root": "outputs/underprediction_ablation_v1",
+    "quantiles": {
+      "tree_q50": 0.5,
+      "tree_underprediction": 0.75
+    },
+    "prediction_rtol": 1e-10,
+    "prediction_atol": 1e-10,
+    "failure_case": {
+      "workload_id": "bursty_02",
+      "start_minute": 14044,
+      "end_minute": 14164,
+      "center_minute": 14104
+    }
+  },
+  "case_selection_before_modified_fitting": true,
+  "cases": [
+    {
+      "workload_id": "bursty_02",
+      "start_minute": 14044,
+      "end_minute": 14164,
+      "center_minute": 14104,
+      "case": "failure",
+      "train_q95": 55.0,
+      "peak_actual": 143.0,
+      "ordinary_peak_prediction": 21.400124947,
+      "selection_rule": "Fixed largest high-flow rise from the original diagnostics",
+      "peak_matched": true,
+      "ordinary_peak_hit": false,
+      "event_start_minute": null,
+      "event_end_minute": null,
+      "peak_relative_distance": null,
+      "event_shortfall_fraction": null
+    },
+    {
+      "workload_id": "bursty_02",
+      "start_minute": 13726,
+      "end_minute": 13846,
+      "center_minute": 13786,
+      "case": "best_available",
+      "train_q95": 55.0,
+      "peak_actual": 57.0,
+      "ordinary_peak_prediction": 52.7295576737,
+      "selection_rule": "No ordinary peak hit; best available event shortfall, not a successful peak forecast",
+      "peak_matched": false,
+      "ordinary_peak_hit": false,
+      "event_start_minute": 13786.0,
+      "event_end_minute": 13786.0,
+      "peak_relative_distance": 0.6013986014,
+      "event_shortfall_fraction": 0.0749200408
+    },
+    {
+      "workload_id": "bursty_01",
+      "start_minute": 14980,
+      "end_minute": 15100,
+      "center_minute": 15040,
+      "case": "success_other_workload",
+      "train_q95": 95.0,
+      "peak_actual": 144.0,
+      "ordinary_peak_prediction": 141.2750251111,
+      "selection_rule": "Supplementary other-bursty-workload peak hit; prefer matched peak and minimum event shortfall; not a within-workload control",
+      "peak_matched": true,
+      "ordinary_peak_hit": true,
+      "event_start_minute": 15040.0,
+      "event_end_minute": 15040.0,
+      "peak_relative_distance": 0.006993007,
+      "event_shortfall_fraction": 0.0189234367
+    }
+  ],
+  "input_sha256": {
+    "config": "26d7de992f03bab939e221db90ca8ef9c0a62ed58645d0cdd226bce6c1b560b3",
+    "baseline_config": "aa30e627d4cab2e33f1a8602e099c3836052d1de27335e1df792d1fce17c8226",
+    "baseline_manifest": "0f33308f25bc8e8ec375cbd35b9c8bf1fcfec701f65ecb50ad57774d46928bd8",
+    "baseline_diagnostics_manifest": "8bd2df9a9b9f6c94557ed3d4e5ddfd20e13c28e997fd3ec2191b88a5ff5eaefc",
+    "train": "22ce51fa4d8cc400007df6d25b1c38b3e1b2594026e2f09b02f7fcbfcb682ad6",
+    "validation": "33bb546dd6b1681e463845eae90acdb9fe05ce10be81cdf44534b1d7020ce1ed",
+    "feature_contract": "1293f2af357aabc3e3dd018a18e511649a5bad8cf86232d92c6ceeda81fb1d77",
+    "forecasts": "07c6fd07d6df7a7cd37c249ed3149736108b6a5b920f2b94348fc7197f1de0f5",
+    "workloads": "70dcec31c1933f8d10219c95282af8bd2046297664a8667f0f635382b5edd7a9",
+    "model_bursty_01_linear": "797fe85955458ce122bffe1f24780c2786cb69aeb6369c893269c3ef31c9ad42",
+    "model_bursty_01_tree": "d7cfa0ed73247f4d099ce2ecc18f64327a6d30727793783ea70bad80f84f03eb",
+    "model_bursty_02_linear": "9d551e0b8448bb1a2d4c5357028ae11a0f4e9171df7b2341a21ef535150fc6fc",
+    "model_bursty_02_tree": "b109010ec737034bc26e77f54617b73abd9e5438d2be44a55184f8f813bd2e24",
+    "model_steady_01_linear": "064b6d5dac4a92cd4900fd7328911cdf0aff7b6d29ffba8ee4095a9542ccb7cf",
+    "model_steady_01_tree": "603d369e7100dedaa78ccf1879e0fca436c5adc021b35d725f986f8338c0d205",
+    "model_steady_02_linear": "1dbbe5d80933f95af9607606330ed22adb06da8f03338d714389a12c9ecb6392",
+    "model_steady_02_tree": "c887c3dd5810283bf64dbdf621efad6f8e2351299290a0b13c952bd0385c6e5b"
+  },
+  "baseline_prediction_tolerance": {
+    "rtol": 1e-10,
+    "atol": 1e-10
+  },
+  "test_used": false
+}
