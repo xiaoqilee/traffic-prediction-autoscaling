@@ -650,6 +650,9 @@ def simulate_replay(
         )
         capture_new_drops(current_minute)
 
+        # Serve queued requests whenever capacity becomes available.
+        drain_waiting_requests(current_second)
+
         # Make a scaling decision at each minute boundary.
         if current_second % 60 == 0:
             if policy == "forecast":

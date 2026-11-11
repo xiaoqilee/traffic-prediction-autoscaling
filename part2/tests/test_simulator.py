@@ -392,6 +392,61 @@ class TargetApplicationTests(unittest.TestCase):
         self.assertEqual(result["active_servers"], 1)
         self.assertEqual(result["starting_servers"], 0)
 
+class DispatchCadenceTests(unittest.TestCase):
+    def test_queued_requests_are_served_without_minute_boundary_delay(self):
+        traffic = pd.DataFrame(
+            [
+                {
+                    "workload_id": "dispatch_test",
+                    "minute": 0,
+                    "request_count": 20,
+                    "split": "validation",
+                }
+            ]
+        )
+
+        forecasts = pd.DataFrame(
+            [
+                {
+                    "workload_id": "dispatch_test",
+                    "prediction_time": 0,
+                    "target_minute": 3,
+                    "model": "tree",
+                    "predicted_count": 1,
+                }
+            ]
+        )
+
+        config = {
+            "capacity_per_server_per_minute": 60,
+            "service_time_seconds": 1.0,
+            "startup_delay_minutes": 3,
+            "request_timeout_seconds": 60,
+            "slo_seconds": 5,
+            "initial_active_servers": 1,
+            "minimum_servers": 1,
+            "arrival_mode": "uniform",
+            "random_seed": 42,
+        }
+
+        result = simulate_replay(
+            traffic=traffic,
+            forecasts=forecasts,
+            config=config,
+            policy="forecast",
+            workload_id="dispatch_test",
+            model="tree",
+            run_id="dispatch-cadence-test",
+        )
+
+        outcomes = result["request_outcomes"]
+
+        self.assertTrue(outcomes["status"].eq("completed").all())
+        self.assertLess(
+            outcomes["response_time_seconds"].max(),
+            5.0,
+        )
+
 class ReplayTests(unittest.TestCase):
     def test_small_forecast_replay_returns_outputs(self):
         repository_root = Path(__file__).parents[2]
