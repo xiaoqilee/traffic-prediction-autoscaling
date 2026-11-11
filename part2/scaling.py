@@ -23,6 +23,26 @@ def target_servers_from_forecast(
 
     return max(minimum_servers, required_servers)
 
+def target_servers_with_headroom(
+    predicted_count,
+    capacity_per_server_per_minute,
+    headroom_factor=1.0,
+    minimum_servers=1,
+):
+    """Choose servers after multiplying demand by a capacity buffer."""
+    if headroom_factor <= 0:
+        raise ValueError("Headroom factor must be positive")
+
+    adjusted_count = (
+        float(predicted_count) * headroom_factor
+    )
+
+    return target_servers_from_forecast(
+        adjusted_count,
+        capacity_per_server_per_minute,
+        minimum_servers,
+    )
+
 def target_servers_reactive(
     previous_actual_count,
     capacity_per_server_per_minute,
