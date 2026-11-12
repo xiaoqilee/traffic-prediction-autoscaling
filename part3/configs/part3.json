@@ -9,5 +9,7 @@
   "headroom_factors": [0.5, 0.75, 1.0, 1.25, 1.5, 2.0],
   "startup_delays_for_controlled": [1, 3, 5],
   "workloads": ["steady_01", "steady_02", "bursty_01", "bursty_02"],
-  "forecast_models": ["persistence", "linear", "tree"]
+  "forecast_models": ["persistence", "linear", "tree", "tree_q50", "tree_underprediction"],
+  "n_seeds": 20,
+  "seasonal_period_minutes": 1440
 }

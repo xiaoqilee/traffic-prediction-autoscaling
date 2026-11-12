@@ -12,8 +12,9 @@ from part3.src.metrics import summarize_run
 REPO_ROOT = Path(__file__).parents[2]
 PART2_CONFIG = REPO_ROOT / "part2" / "config.json"
 PART3_CONFIG = REPO_ROOT / "part3" / "configs" / "part3.json"
-TRAFFIC_PATH = REPO_ROOT / "part1" / "data" / "processed" / "traffic.csv"
-FORECAST_PATH = REPO_ROOT / "part1" / "outputs" / "forecasts" / "validation.csv"
+BUNDLE = REPO_ROOT / "part1" / "outputs" / "underprediction_ablation_v1"
+TRAFFIC_PATH = BUNDLE / "traffic_validation.csv"
+FORECAST_PATH = BUNDLE / "forecasts" / "validation.csv"
 SWEEP_OUTPUT = REPO_ROOT / "part3" / "outputs" / "metrics" / "headroom_sweep.csv"
 FIGURE_OUTPUT = REPO_ROOT / "part3" / "outputs" / "figures" / "headroom_sweep.png"
 
@@ -104,9 +105,12 @@ def plot_sweep(sweep_df, output_path):
                 "bursty_01": "bursty", "bursty_02": "bursty"}
     sweep_df["pattern"] = sweep_df["workload_id"].map(patterns)
 
-    models = [m for m in ["persistence", "linear", "tree"] if m in sweep_df["model"].unique()]
-    colors = {"persistence": "#e07b39", "linear": "#4c8cbf", "tree": "#5aab5a"}
-    markers = {"persistence": "o", "linear": "s", "tree": "^"}
+    model_order = ["persistence", "linear", "tree", "tree_q50", "tree_underprediction"]
+    models = [m for m in model_order if m in sweep_df["model"].unique()]
+    colors = {"persistence": "#e07b39", "linear": "#4c8cbf", "tree": "#5aab5a",
+              "tree_q50": "#AA3377", "tree_underprediction": "#CC3311"}
+    markers = {"persistence": "o", "linear": "s", "tree": "^",
+               "tree_q50": "D", "tree_underprediction": "P"}
 
     fig, axes = plt.subplots(1, 2, figsize=(12, 5), sharey=False)
 

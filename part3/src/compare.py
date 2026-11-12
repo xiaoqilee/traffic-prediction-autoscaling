@@ -11,7 +11,8 @@ REPO_ROOT = Path(__file__).parents[2]
 PART3_CONFIG = REPO_ROOT / "part3" / "configs" / "part3.json"
 
 FORECAST_METRICS_PATH = (
-    REPO_ROOT / "part1" / "outputs" / "metrics" / "forecast_validation.csv"
+    REPO_ROOT / "part1" / "outputs" / "underprediction_ablation_v1"
+    / "metrics" / "forecast_validation.csv"
 )
 VALIDATION_DIR = REPO_ROOT / "part3" / "outputs" / "validation"
 OUTPUT_PATH = REPO_ROOT / "part3" / "outputs" / "metrics" / "comparison_table.csv"

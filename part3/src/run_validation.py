@@ -11,8 +11,10 @@ REPO_ROOT = Path(__file__).parents[2]
 PART2_CONFIG = REPO_ROOT / "part2" / "config.json"
 PART3_CONFIG = REPO_ROOT / "part3" / "configs" / "part3.json"
 
-TRAFFIC_PATH = REPO_ROOT / "part1" / "data" / "processed" / "traffic.csv"
-FORECAST_PATH = REPO_ROOT / "part1" / "outputs" / "forecasts" / "validation.csv"
+# Part 1 underprediction-ablation bundle: validation-only traffic and 5-method forecasts.
+BUNDLE = REPO_ROOT / "part1" / "outputs" / "underprediction_ablation_v1"
+TRAFFIC_PATH = BUNDLE / "traffic_validation.csv"
+FORECAST_PATH = BUNDLE / "forecasts" / "validation.csv"
 OUTPUT_DIR = REPO_ROOT / "part3" / "outputs" / "validation"
 
 

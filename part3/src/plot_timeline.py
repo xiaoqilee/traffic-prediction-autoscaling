@@ -9,8 +9,9 @@ import pandas as pd
 
 REPO_ROOT = Path(__file__).parents[2]
 PART3_CONFIG = REPO_ROOT / "part3" / "configs" / "part3.json"
-TRAFFIC_PATH = REPO_ROOT / "part1" / "data" / "processed" / "traffic.csv"
-FORECAST_PATH = REPO_ROOT / "part1" / "outputs" / "forecasts" / "validation.csv"
+BUNDLE = REPO_ROOT / "part1" / "outputs" / "underprediction_ablation_v1"
+TRAFFIC_PATH = BUNDLE / "traffic_validation.csv"
+FORECAST_PATH = BUNDLE / "forecasts" / "validation.csv"
 MINUTE_LOGS_PATH = REPO_ROOT / "part3" / "outputs" / "validation" / "minute_logs.csv"
 DIAGNOSTIC_WINDOWS_PATH = (
     REPO_ROOT / "part1" / "outputs" / "metrics" / "diagnostic_windows_validation.csv"
@@ -43,8 +44,9 @@ def plot_timeline(
         & forecasts_df["target_minute"].between(start, end)
     ]
 
-    colors = {"persistence": "#e07b39", "linear": "#4c8cbf", "tree": "#5aab5a"}
-    server_colors = {"persistence": "#e07b39", "linear": "#4c8cbf", "tree": "#5aab5a", "reactive": "#9b59b6"}
+    colors = {"persistence": "#e07b39", "linear": "#4c8cbf", "tree": "#5aab5a",
+              "tree_q50": "#AA3377", "tree_underprediction": "#CC3311"}
+    server_colors = {**colors, "reactive": "#9b59b6"}
 
     fig, axes = plt.subplots(4, 1, figsize=(14, 10), sharex=True)
 

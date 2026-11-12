@@ -13,11 +13,11 @@ from part3.src.metrics import summarize_run
 REPO_ROOT = Path(__file__).parents[2]
 PART2_CONFIG = REPO_ROOT / "part2" / "config.json"
 PART3_CONFIG = REPO_ROOT / "part3" / "configs" / "part3.json"
-TRAFFIC_PATH = REPO_ROOT / "part1" / "data" / "processed" / "traffic.csv"
-FORECAST_PATH = REPO_ROOT / "part1" / "outputs" / "forecasts" / "validation.csv"
-FORECAST_METRICS_PATH = (
-    REPO_ROOT / "part1" / "outputs" / "metrics" / "forecast_validation.csv"
-)
+BUNDLE = REPO_ROOT / "part1" / "outputs" / "underprediction_ablation_v1"
+TRAFFIC_PATH = BUNDLE / "traffic_validation.csv"
+FORECAST_PATH = BUNDLE / "forecasts" / "validation.csv"
+FORECAST_METRICS_PATH = BUNDLE / "metrics" / "forecast_validation.csv"
+FORECAST_DIAGNOSTICS_PATH = BUNDLE / "metrics" / "forecast_diagnostics_validation.csv"
 DIAGNOSTIC_WINDOWS_PATH = (
     REPO_ROOT / "part1" / "outputs" / "metrics" / "diagnostic_windows_validation.csv"
 )
@@ -62,6 +62,11 @@ def build_synthetic_forecasts(traffic_df, workload_id, target_mae, train_q95, rn
     minutes = wl["minute"].values
 
     episodes = _find_burst_episodes(actuals, train_q95)
+    # The distortion only touches burst minutes, so error outside bursts is zero.
+    # Match accuracy where it is manipulated: MAE over high-flow (burst) minutes.
+    high_flow_mask = actuals > train_q95
+    if not high_flow_mask.any():
+        raise ValueError(f"No high-flow minutes for {workload_id} at q95={train_q95}")
 
     def make_predictions(alpha, mode):
         preds = actuals.copy()
@@ -82,12 +87,22 @@ def build_synthetic_forecasts(traffic_df, workload_id, target_mae, train_q95, rn
         return np.clip(preds, 0.0, None)
 
     def compute_mae(alpha, mode):
+        # High-flow MAE in target-minute space: pred for target T vs actual at
+        # target T, averaged over burst minutes (the only minutes we distort).
         preds = make_predictions(alpha, mode)
-        return float(np.mean(np.abs(actuals - preds)))
+        return float(np.mean(np.abs((actuals - preds)[high_flow_mask])))
 
     def tune_alpha(mode):
+        # compute_mae is monotonic increasing in alpha (0 at alpha=0), so bisect.
+        max_mae = compute_mae(1.0, mode)
+        if target_mae >= max_mae:
+            print(
+                f"  warning: {mode} target MAE {target_mae:.2f} exceeds max "
+                f"achievable {max_mae:.2f}; clamping to alpha=1.0"
+            )
+            return 1.0
         lo, hi = 0.0, 1.0
-        for _ in range(30):
+        for _ in range(60):
             mid = (lo + hi) / 2.0
             if compute_mae(mid, mode) < target_mae:
                 lo = mid
@@ -99,12 +114,16 @@ def build_synthetic_forecasts(traffic_df, workload_id, target_mae, train_q95, rn
     for mode, label in [("early", "synth_early"), ("late", "synth_late")]:
         alpha = tune_alpha(mode)
         preds = make_predictions(alpha, mode)
-        for t, (minute, pred) in enumerate(zip(minutes, preds)):
+        # Emit in the same (prediction_time, target_minute) convention as the real
+        # Part 1 forecasts: horizon 3, with predicted_count forecasting the target
+        # minute. The distortion above was built against actual[target], so the
+        # tuned MAE equals the MAE the simulator and the verification observe.
+        for minute, pred in zip(minutes, preds):
             rows.append(
                 {
                     "workload_id": workload_id,
-                    "prediction_time": int(minute),
-                    "target_minute": int(minute) + 3,
+                    "prediction_time": int(minute) - 3,
+                    "target_minute": int(minute),
                     "model": label,
                     "predicted_count": round(float(pred), 4),
                 }
@@ -187,7 +206,7 @@ def plot_experiment(experiment_df, real_mae_map, output_path):
                 continue
             slo_rate = float(row["slo_violation_rate"].iloc[0])
             mae = real_mae_map.get(model, None)
-            label = f"{model} (MAE={mae:.1f})" if mae else model
+            label = f"{model} (hf-MAE={mae:.1f})" if mae else model
             ax.bar(model, slo_rate, color=colors.get(model, "grey"), alpha=0.8, label=label)
 
         ax.set_title(f"startup delay = {delay}min")
@@ -211,13 +230,14 @@ def main():
     all_traffic, all_forecasts = load_replay_inputs(TRAFFIC_PATH, FORECAST_PATH)
     traffic = all_traffic.loc[all_traffic["split"].eq("validation")].copy()
 
-    forecast_metrics = pd.read_csv(FORECAST_METRICS_PATH)
-    bursty_02_metrics = forecast_metrics.loc[
-        forecast_metrics["workload_id"].eq(WORKLOAD)
-    ]
+    # Target the linear model's high-flow (burst) MAE, not its global MAE: the
+    # synthetic forecasts are accurate outside bursts, so only the burst-level
+    # error is controllable and comparable.
+    diagnostics = pd.read_csv(FORECAST_DIAGNOSTICS_PATH)
+    workload_diag = diagnostics.loc[diagnostics["workload_id"].eq(WORKLOAD)]
 
     target_mae = float(
-        bursty_02_metrics.loc[bursty_02_metrics["model"].eq("linear"), "mae"].iloc[0]
+        workload_diag.loc[workload_diag["model"].eq("linear"), "high_flow_mae"].iloc[0]
     )
 
     diag_windows = pd.read_csv(DIAGNOSTIC_WINDOWS_PATH)
@@ -225,7 +245,7 @@ def main():
         diag_windows.loc[diag_windows["workload_id"].eq(WORKLOAD), "train_q95"].iloc[0]
     )
 
-    print(f"Building synthetic forecasts for {WORKLOAD} (target MAE={target_mae:.2f}, train_q95={train_q95:.1f})")
+    print(f"Building synthetic forecasts for {WORKLOAD} (target high-flow MAE={target_mae:.2f}, train_q95={train_q95:.1f})")
     synthetic = build_synthetic_forecasts(
         traffic_df=all_traffic,
         workload_id=WORKLOAD,
@@ -237,17 +257,21 @@ def main():
     synthetic.to_csv(SYNTHETIC_OUTPUT, index=False)
     print(f"Saved synthetic forecasts to {SYNTHETIC_OUTPUT}")
 
-    # Verify MAE of synthetic forecasts
+    # Verify high-flow MAE of synthetic forecasts, aligned on target_minute
+    # (horizon 3) against the actual demand at that target minute.
     wl_traffic = all_traffic.loc[
         all_traffic["workload_id"].eq(WORKLOAD)
         & all_traffic["split"].eq("validation")
     ].set_index("minute")["request_count"]
+    high_flow_minutes = wl_traffic.index[wl_traffic.values > train_q95]
 
     for model in ["synth_early", "synth_late"]:
         m_fc = synthetic.loc[synthetic["model"].eq(model)].set_index("target_minute")
         joined = m_fc["predicted_count"].reindex(wl_traffic.index)
-        mae = float((joined - wl_traffic).abs().mean())
-        print(f"  {model} MAE = {mae:.3f} (target {target_mae:.3f})")
+        high_flow_mae = float(
+            (joined.loc[high_flow_minutes] - wl_traffic.loc[high_flow_minutes]).abs().mean()
+        )
+        print(f"  {model} high-flow MAE = {high_flow_mae:.3f} (target {target_mae:.3f})")
 
     real_forecasts = all_forecasts.loc[
         all_forecasts["workload_id"].eq(WORKLOAD)
@@ -268,8 +292,10 @@ def main():
     print(f"\nSaved experiment results to {EXPERIMENT_OUTPUT}")
     print(experiment_df.to_string(index=False))
 
+    # Label each bar by its high-flow MAE so synthetic and real models are on the
+    # same (burst-accuracy) footing.
     real_mae_map = dict(
-        zip(bursty_02_metrics["model"], bursty_02_metrics["mae"])
+        zip(workload_diag["model"], workload_diag["high_flow_mae"])
     )
     real_mae_map["synth_early"] = target_mae
     real_mae_map["synth_late"] = target_mae
